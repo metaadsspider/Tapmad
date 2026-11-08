@@ -1,139 +1,108 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Fox Cricket</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
-  <meta name="referrer" content="no-referrer"/>
-  
-  <!-- Plyr CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NBCU Local Live Player</title>
 
-  <!-- HLS.js -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css"/>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-L7VPXZYQPN"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-  <!-- Plyr JS -->
-  <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
+  gtag('config', 'G-L7VPXZYQPN');
+</script>
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-  <style>
-    body {
-      background-color: #000;
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-    }
-    html, body {
-      height: 100%;
-      width: 100%;
-    }
-    .video-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background: #000;
-    }
-    .plyr {
-      height: 100%;
-      width: 100%;
-    }
-  </style>
+body{
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    font-family:Arial,sans-serif;
+}
+
+.player-container{
+    width:100%;
+    max-width:1400px;
+}
+
+video{
+    width:100%;
+    height:auto;
+}
+</style>
 </head>
 <body>
-  <div class="video-container">
-    <video autoplay playsinline muted id="player" controls preload="metadata"></video>
-  </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const video = document.getElementById("player");
-      const source = "https://live.talkoraai.com/match/seg?t=F0Qo3yNlCI18jul5soTRs6UkhD1_Dy-3U_dJt0VBK6ikW5GcG1qnsbE5IjUMGjHn-sWFCCn78fDxidGJhEB0pX1xfJGYipHYbacrEaCMyeRgF0GKeuUvYYTGIubdagpg2A60veJ8iZoZoz0gaLcpKsaDEnmdQR-U2Ycxr95zGWN2JgqOKX5993zTPk6ofhOqaYsovDUVly-LD5kgjjqDUGDRAqJSefdtrCzhpi7z27UCc5wyfgnXqeNmmIoUNGf4EFKALeEFKvkWhLXpGeKm9tdNI0LIJMZSK05KS_sa";
+<div class="player-container">
+    <video
+        id="player"
+        controls
+        playsinline
+        crossorigin
+    ></video>
+</div>
 
-      const defaultOptions = {
-        autoplay: true,
-        controls: [
-          'play', 'rewind', 'fast-forward', 'progress', 'current-time',
-          'mute', 'volume', 'settings', 'fullscreen'
-        ],
-        settings: ['quality']
-      };
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 
-      let player;
+<script>
+const video = document.getElementById('player');
 
-      function setupPlayer(hls, qualities = []) {
-        player = new Plyr(video, {
-          ...defaultOptions,
-          quality: qualities.length ? {
-            default: qualities[0],
-            options: qualities,
-            forced: true,
-            onChange: q => {
-              hls.levels.forEach((level, index) => {
-                if (level.height === q) {
-                  hls.currentLevel = index;
-                }
-              });
-            }
-          } : {}
-        });
+const streamUrl =
+'https://amg01269-amg01269c1-sportstribal-emea-5204.playouts.now.amagi.tv/ts-eu-w1-n2/playlist/amg01269-willowtvfast-willowplus-sportstribalemea/cb543d1e786c648b98d43e63d8ef44a4f9591fde1d6988693eb5518975d1073edce2a59caa08ff16388f1ede7f0a66413a3e951fda77118fd87eb141453c5728cfffe729a2c05616b7db083429b56a062a866a68ac39437ed0e21f48a238b6720a5aa82a66443d80b846ac7357db80148b61299bce8c37683f03409a5e5afba358b1ebe55a47dc6ea7b54855c67a16e09f43c8821da6d2dd09985ed023f2119f94f5dad0448283f32393688aa2d675581fb0ae3bf6e053b2d39b1b56f61309756e9e623ef1842a1d954e42269597673d498d74fd882d807224ba42f72727bea719c82b959b2b82a4b3de500b51cea2033475f2b5f1d8b95d47cc5278671279f325b98f09c894f0f81d170b72fcdcd81d858c3e99ba2884a06827f5a1fb4ab692a88ae3bc8c05c96b9a87bcaf344c4a6c1311c67396da3c8b678d23e8f91a2f0a191fed820390cf997f20724383b75bd63812ad94ded08840689c205371c054f477492cc03d6779a50afc993763c066298d2732f65d7ad117a9f67cbbf795b54608b4d8c650f620bae65d9ca554db18563335bafc2850525f3d81be146a1e4d8314b49d9a9b346366cbf8c2f9cc5642771a1f400386e7a73ddbb9c9271919d64064075015049d10d979d56110e04f26a25f1a6fbfeefc638c8e0103c5f8321398c35270/9/1280x720_3000140/index.m3u8';
 
-        // 🔁 AUTO RESUME
-        setInterval(() => {
-          if (video.paused && video.readyState > 2) {
-            video.play().catch(()=>{});
-          }
-        }, 3000);
+const player = new Plyr(video, {
+    controls: [
+        'play-large',
+        'play',
+        'progress',
+        'current-time',
+        'mute',
+        'volume',
+        'settings',
+        'pip',
+        'airplay',
+        'fullscreen'
+    ],
+    settings: ['speed'],
+    speed: {
+        selected: 1,
+        options: [0.5, 0.75, 1, 1.25, 1.5, 2]
+    }
+});
 
-        // 🔊 AUTO UNMUTE (on first interaction)
-        const unmute = () => {
-          video.muted = false;
-          video.volume = 1;
-          document.removeEventListener("click", unmute);
-          document.removeEventListener("touchstart", unmute);
-        };
-
-        document.addEventListener("click", unmute);
-        document.addEventListener("touchstart", unmute);
-      }
-
-      if (Hls.isSupported()) {
-        const hls = new Hls({
-          autoStartLoad: true
-        });
-
-        hls.loadSource(source);
-        hls.attachMedia(video);
-
-        hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
-          const availableQualities = data.levels.map(l => l.height).sort((a,b) => b - a);
-          video.play().catch(()=>{});
-          setupPlayer(hls, availableQualities);
-        });
-
-        // 🔥 AUTO RECOVER ON ERROR
-        hls.on(Hls.Events.ERROR, function (_, data) {
-          if (data.fatal) {
-            hls.startLoad();
-          }
-        });
-
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = source;
-        video.addEventListener("loadedmetadata", () => {
-          video.play().catch(()=>{});
-          setupPlayer(null);
-        });
-      }
+if (Hls.isSupported()) {
+    const hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true
     });
-  </script>
-  <script>(function(s){s.dataset.zone='11514537',s.src='https://llvpn.com/tag.min.js'})</script>
+
+    hls.loadSource(streamUrl);
+    hls.attachMedia(video);
+
+    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+        video.play().catch(() => {});
+    });
+
+} else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = streamUrl;
+    video.addEventListener('loadedmetadata', function () {
+        video.play().catch(() => {});
+    });
+}
+</script>
+<script>(function(s){s.dataset.zone='10603308',s.src='https://llvpn.com/tag.min.js'})</script>
+  
 </body>
 </html>

@@ -1,108 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NBCU Local Live Player</title>
-
-<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css"/>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-L7VPXZYQPN"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-L7VPXZYQPN');
-</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stream</title>
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-body{
-    background:#000;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
-    font-family:Arial,sans-serif;
-}
-
-.player-container{
-    width:100%;
-    max-width:1400px;
-}
-
-video{
-    width:100%;
-    height:auto;
-}
+  html,body{margin:0;height:100%;background:#000}
+  video{width:100%;height:100%}
 </style>
 </head>
 <body>
-
-<div class="player-container">
-    <video
-        id="player"
-        controls
-        playsinline
-        crossorigin
-    ></video>
-</div>
-
+<video id="videoEl" controls autoplay muted playsinline></video>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
-
 <script>
-const video = document.getElementById('player');
-
-const streamUrl =
-'https://amg01269-amg01269c1-sportstribal-emea-5204.playouts.now.amagi.tv/ts-eu-w1-n2/playlist/amg01269-willowtvfast-willowplus-sportstribalemea/cb543d1e786c648b98d43e63d8ef44a4f9591fde1d6988693eb5518975d1073edce2a59caa08ff16388f1ede7f0a66413a3e951fda77118fd87eb141453c5728cfffe729a2c05616b7db083429b56a062a866a68ac39437ed0e21f48a238b6720a5aa82a66443d80b846ac7357db80148b61299bce8c37683f03409a5e5afba358b1ebe55a47dc6ea7b54855c67a16e09f43c8821da6d2dd09985ed023f2119f94f5dad0448283f32393688aa2d675581fb0ae3bf6e053b2d39b1b56f61309756e9e623ef1842a1d954e42269597673d498d74fd882d807224ba42f72727bea719c82b959b2b82a4b3de500b51cea2033475f2b5f1d8b95d47cc5278671279f325b98f09c894f0f81d170b72fcdcd81d858c3e99ba2884a06827f5a1fb4ab692a88ae3bc8c05c96b9a87bcaf344c4a6c1311c67396da3c8b678d23e8f91a2f0a191fed820390cf997f20724383b75bd63812ad94ded08840689c205371c054f477492cc03d6779a50afc993763c066298d2732f65d7ad117a9f67cbbf795b54608b4d8c650f620bae65d9ca554db18563335bafc2850525f3d81be146a1e4d8314b49d9a9b346366cbf8c2f9cc5642771a1f400386e7a73ddbb9c9271919d64064075015049d10d979d56110e04f26a25f1a6fbfeefc638c8e0103c5f8321398c35270/9/1280x720_3000140/index.m3u8';
-
-const player = new Plyr(video, {
-    controls: [
-        'play-large',
-        'play',
-        'progress',
-        'current-time',
-        'mute',
-        'volume',
-        'settings',
-        'pip',
-        'airplay',
-        'fullscreen'
-    ],
-    settings: ['speed'],
-    speed: {
-        selected: 1,
-        options: [0.5, 0.75, 1, 1.25, 1.5, 2]
-    }
-});
+const videoEl = document.getElementById('videoEl');
+const url = 'https://edge14.xmediaget.com/hls-live/20917253/1/mediaplaylist.m3u8?s=40848673f00367073e35d53fb2eb0b96a2a67560c690c00f8a0ce5435e416606&t=1794145145339&ai=3&av=1025&ui=1153549459';
 
 if (Hls.isSupported()) {
-    const hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: true
-    });
-
-    hls.loadSource(streamUrl);
-    hls.attachMedia(video);
-
-    hls.on(Hls.Events.MANIFEST_PARSED, function () {
-        video.play().catch(() => {});
-    });
-
-} else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = streamUrl;
-    video.addEventListener('loadedmetadata', function () {
-        video.play().catch(() => {});
-    });
+  const hls = new Hls();
+  hls.loadSource(url);
+  hls.attachMedia(videoEl);
+  hls.on(Hls.Events.MANIFEST_PARSED, () => videoEl.play());
+  hls.on(Hls.Events.ERROR, (_, d) => {
+    console.log(d.type, d.details, d.response && d.response.code);
+    if (!d.fatal) return;
+    if (d.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+    else if (d.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+  });
+} else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+  videoEl.src = url;
+  videoEl.play();
 }
 </script>
-<script>(function(s){s.dataset.zone='10603308',s.src='https://llvpn.com/tag.min.js'})</script>
-  
 </body>
 </html>

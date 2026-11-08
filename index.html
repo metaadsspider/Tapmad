@@ -34,11 +34,192 @@ body{
 .player-container{
     width:100%;
     max-width:1400px;
+    position:relative;
 }
 
 video{
     width:100%;
     height:auto;
+}
+
+/* Embed button */
+.embed-btn{
+    position:absolute;
+    top:12px;
+    right:12px;
+    z-index:20;
+    background:rgba(0,0,0,0.6);
+    color:#fff;
+    border:1px solid rgba(255,255,255,0.3);
+    padding:8px 14px;
+    font-size:13px;
+    font-family:Arial,sans-serif;
+    border-radius:6px;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    transition:background .2s ease, border-color .2s ease;
+    user-select:none;
+}
+.embed-btn:hover{
+    background:rgba(0,0,0,0.85);
+    border-color:#fff;
+}
+.embed-btn svg{
+    width:14px;
+    height:14px;
+    fill:currentColor;
+}
+
+/* Modal */
+.embed-modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.75);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+    padding:20px;
+}
+.embed-modal-overlay.active{
+    display:flex;
+}
+
+.embed-modal{
+    background:#1a1a1a;
+    color:#fff;
+    width:100%;
+    max-width:640px;
+    border-radius:10px;
+    border:1px solid #333;
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+
+.embed-modal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 20px;
+    border-bottom:1px solid #333;
+}
+.embed-modal-header h3{
+    font-size:16px;
+    font-weight:600;
+}
+
+.embed-close{
+    background:transparent;
+    border:none;
+    color:#aaa;
+    font-size:22px;
+    cursor:pointer;
+    line-height:1;
+    padding:0 4px;
+}
+.embed-close:hover{
+    color:#fff;
+}
+
+.embed-modal-body{
+    padding:20px;
+}
+
+.embed-row{
+    display:flex;
+    gap:12px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+}
+.embed-field{
+    flex:1 1 120px;
+    display:flex;
+    flex-direction:column;
+}
+.embed-field label{
+    font-size:12px;
+    color:#aaa;
+    margin-bottom:6px;
+}
+.embed-field input{
+    background:#000;
+    border:1px solid #444;
+    color:#fff;
+    padding:8px 10px;
+    border-radius:6px;
+    font-size:13px;
+    font-family:Arial,sans-serif;
+}
+.embed-field input:focus{
+    outline:none;
+    border-color:#fff;
+}
+
+.embed-code-wrap{
+    position:relative;
+    background:#000;
+    border:1px solid #444;
+    border-radius:6px;
+    margin-bottom:16px;
+}
+.embed-code-wrap textarea{
+    width:100%;
+    min-height:120px;
+    background:transparent;
+    border:none;
+    color:#d4f7d4;
+    padding:12px;
+    font-family:'Courier New',monospace;
+    font-size:12px;
+    resize:vertical;
+    line-height:1.5;
+    white-space:pre;
+    overflow:auto;
+}
+.embed-code-wrap textarea:focus{
+    outline:none;
+}
+
+.embed-actions{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+.embed-copy-btn{
+    background:#fff;
+    color:#000;
+    border:none;
+    padding:9px 18px;
+    font-size:13px;
+    font-weight:600;
+    border-radius:6px;
+    cursor:pointer;
+    transition:background .2s ease;
+}
+.embed-copy-btn:hover{
+    background:#ddd;
+}
+.embed-copy-btn.copied{
+    background:#2ecc71;
+    color:#fff;
+}
+.embed-hint{
+    font-size:12px;
+    color:#888;
+}
+.embed-preview-link{
+    font-size:12px;
+    color:#4dabf7;
+    text-decoration:none;
+    margin-left:auto;
+}
+.embed-preview-link:hover{
+    text-decoration:underline;
 }
 </style>
 </head>
@@ -51,6 +232,44 @@ video{
         playsinline
         crossorigin
     ></video>
+
+    <!-- Embed button -->
+    <button class="embed-btn" id="embedBtn" type="button" title="Get embed code">
+        <svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+        Embed
+    </button>
+</div>
+
+<!-- Embed modal -->
+<div class="embed-modal-overlay" id="embedModal" role="dialog" aria-modal="true" aria-labelledby="embedTitle">
+    <div class="embed-modal">
+        <div class="embed-modal-header">
+            <h3 id="embedTitle">Embed this player</h3>
+            <button class="embed-close" id="embedClose" type="button" aria-label="Close">&times;</button>
+        </div>
+        <div class="embed-modal-body">
+            <div class="embed-row">
+                <div class="embed-field">
+                    <label for="embedWidth">Width</label>
+                    <input type="text" id="embedWidth" value="640" placeholder="640 or 100%">
+                </div>
+                <div class="embed-field">
+                    <label for="embedHeight">Height</label>
+                    <input type="text" id="embedHeight" value="360" placeholder="360 or auto">
+                </div>
+            </div>
+
+            <div class="embed-code-wrap">
+                <textarea id="embedCode" readonly spellcheck="false"></textarea>
+            </div>
+
+            <div class="embed-actions">
+                <button class="embed-copy-btn" id="embedCopy" type="button">Copy code</button>
+                <span class="embed-hint" id="embedHint">Paste into your site's HTML.</span>
+                <a class="embed-preview-link" id="embedPreview" href="#" target="_blank" rel="noopener">Preview embed</a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -101,6 +320,114 @@ if (Hls.isSupported()) {
         video.play().catch(() => {});
     });
 }
+
+/* ---------- Embed frame option ---------- */
+(function () {
+    const embedBtn      = document.getElementById('embedBtn');
+    const embedModal    = document.getElementById('embedModal');
+    const embedClose    = document.getElementById('embedClose');
+    const embedWidth    = document.getElementById('embedWidth');
+    const embedHeight   = document.getElementById('embedHeight');
+    const embedCode     = document.getElementById('embedCode');
+    const embedCopy     = document.getElementById('embedCopy');
+    const embedHint     = document.getElementById('embedHint');
+    const embedPreview  = document.getElementById('embedPreview');
+
+    // The page URL that the iframe should load (this very page).
+    // Falls back gracefully if location.href isn't available.
+    function selfUrl() {
+        try {
+            return window.location.href.split('#')[0];
+        } catch (e) {
+            return '';
+        }
+    }
+
+    function escAttr(s) {
+        return String(s).replace(/&/g, '&amp;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
+    }
+
+    function buildCode() {
+        const url = selfUrl();
+        const w   = (embedWidth.value.trim() || '640');
+        const h   = (embedHeight.value.trim() || '360');
+        const src = url;
+
+        embedCode.value =
+            '<iframe\n' +
+            '  src="' + escAttr(src) + '"\n' +
+            '  width="' + escAttr(w) + '"\n' +
+            '  height="' + escAttr(h) + '"\n' +
+            '  frameborder="0"\n' +
+            '  allow="autoplay; fullscreen; picture-in-picture"\n' +
+            '  allowfullscreen\n' +
+            '  loading="lazy">\n' +
+            '</iframe>';
+
+        if (src) {
+            embedPreview.href = src;
+            embedPreview.style.display = '';
+        } else {
+            embedPreview.style.display = 'none';
+        }
+    }
+
+    function openModal() {
+        buildCode();
+        embedModal.classList.add('active');
+    }
+    function closeModal() {
+        embedModal.classList.remove('active');
+    }
+
+    embedBtn.addEventListener('click', openModal);
+    embedClose.addEventListener('click', closeModal);
+    embedModal.addEventListener('click', function (e) {
+        if (e.target === embedModal) closeModal();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    embedWidth.addEventListener('input', buildCode);
+    embedHeight.addEventListener('input', buildCode);
+
+    embedCopy.addEventListener('click', function () {
+        const text = embedCode.value;
+        const done = function () {
+            embedCopy.textContent = 'Copied!';
+            embedCopy.classList.add('copied');
+            embedHint.textContent = 'Paste into your site\'s HTML.';
+            setTimeout(function () {
+                embedCopy.textContent = 'Copy code';
+                embedCopy.classList.remove('copied');
+            }, 1800);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done).catch(function () {
+                fallbackCopy(text);
+                done();
+            });
+        } else {
+            fallbackCopy(text);
+            done();
+        }
+    });
+
+    function fallbackCopy(text) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+    }
+})();
 </script>
 <script>(function(s){s.dataset.zone='10603308',s.src='https://llvpn.com/tag.min.js'})</script>
   

@@ -17,59 +17,49 @@ font:13px system-ui;border-radius:5px;z-index:5;display:none}
 </head>
 <body>
 <div id="wrap">
-  <video id="video" playsinline autoplay muted></video>
-  <div id="status">Reconnecting to live stream…</div>
+<video id="video" playsinline autoplay muted></video>
+<div id="status">Reconnecting to live stream…</div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.15"></script>
 <script src="https://cdn.jsdelivr.net/npm/plyr@3.7.8/dist/plyr.polyfilled.js"></script>
 <script>
-const video = document.getElementById('video');
-const status = document.getElementById('status');
-const source = 'https://edg12.smytdryt.live/eb811ab698f20153e91e33ee87c2b689/multy.m3u8?match_id=46093236&s_id=24&t_id=511355&stats=stats1wcxpt.life&timestamp=1794146709&language=eng&key=VTJGc2RHVmtYMS9vVm1sek5GUjZLN2JXMjB6YzBmVnFDMzAya1c4d1I5NUwyc1pvak5pWnVCdHRTM1RkeGN1QWRINWUvaWE4em9JSWFqN2E1NUtNZ2k3aTdXVlJpRng4dnk4RDJWc1VmRFhYaU5NUjN3WksyS3F0RVRPaXFiRnMvMTkxd3F2Q3dheGt4ZCtoUU1oSXMwN3ROUkE2TFFyNytIRFRoNUZ0WGtPc05lWVhPQVNWUVBGVmlRYWpRTHBZdFc4dkFxV1hpMWN4dkxnTXJjdDBPcjN4blE5RmN3VEtMdy9MMkxhTkZMVT0%3D&excluded_languages=';
-const player = new Plyr(video, {
+const video=document.getElementById('video'), status=document.getElementById('status');
+const source='https://edg12.smytdryt.live/eb811ab698f20153e91e33ee87c2b689/multy.m3u8?match_id=46093236&s_id=24&t_id=511355&stats=stats1wcxpt.life&timestamp=1794146709&language=eng&key=VTJGc2RHVmtYMS9vVm1sek5GUjZLN2JXMjB6YzBmVnFDMzAya1c4d1I5NUwyc1pvak5pWnVCdHRTM1RkeGN1QWRINWUvaWE4em9JSWFqN2E1NUtNZ2k3aTdXVlJpRng4dnk4RDJWc1VmRFhYaU5NUjN3WksyS3F0RVRPaXFiRnMvMTkxd3F2Q3dheGt4ZCtoUU1oSXMwN3ROUkE2TFFyNytIRFRoNUZ0WGtPc05lWVhPQVNWUVBGVmlRYWpRTHBZdFc4dkFxV1hpMWN4dkxnTXJjdDBPcjN4blE5RmN3VEtMdy9MMkxhTkZMVT0%3D&excluded_languages=';
+const player=new Plyr(video,{
   autoplay:true, muted:true,
-  controls:['play','fullscreen'],
+  controls:['play','mute','volume','fullscreen'],
   settings:[], clickToPlay:false, hideControls:true
 });
-let hls, lastTime=-1, stuckChecks=0, reconnecting=false;
-
-function connect() {
-  if(hls) { try { hls.destroy(); } catch(e) {} }
-  reconnecting=false;
-  status.style.display='none';
-  hls=new Hls({
-    liveSyncDurationCount:3, liveMaxLatencyDurationCount:8,
-    maxLiveSyncPlaybackRate:1.5, lowLatencyMode:false,
-    backBufferLength:30, maxBufferLength:20, maxMaxBufferLength:30,
-    manifestLoadingTimeOut:20000, levelLoadingTimeOut:20000,
-    fragLoadingTimeOut:30000, fragLoadingMaxRetry:6,
-    fragLoadingRetryDelay:1000, levelLoadingMaxRetry:6,
-    levelLoadingRetryDelay:1000
-  });
-  hls.loadSource(source);
-  hls.attachMedia(video);
-  hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(()=>{}));
-  hls.on(Hls.Events.ERROR,(_,data)=>{
-    if(!data.fatal)return;
-    status.style.display='block';
-    if(data.type===Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
-    else if(data.type===Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
-    else setTimeout(connect,2500);
-  });
+let hls,lastTime=-1,stuckChecks=0,reconnecting=false;
+function connect(){
+ if(hls){try{hls.destroy()}catch(e){}}
+ reconnecting=false; status.style.display='none';
+ hls=new Hls({liveSyncDurationCount:3,liveMaxLatencyDurationCount:8,
+ maxLiveSyncPlaybackRate:1.5,lowLatencyMode:false,backBufferLength:30,
+ maxBufferLength:20,maxMaxBufferLength:30,manifestLoadingTimeOut:20000,
+ levelLoadingTimeOut:20000,fragLoadingTimeOut:30000,fragLoadingMaxRetry:6,
+ fragLoadingRetryDelay:1000,levelLoadingMaxRetry:6,levelLoadingRetryDelay:1000});
+ hls.loadSource(source);hls.attachMedia(video);
+ hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(()=>{}));
+ hls.on(Hls.Events.ERROR,(_,data)=>{
+  if(!data.fatal)return;status.style.display='block';
+  if(data.type===Hls.ErrorTypes.NETWORK_ERROR)hls.startLoad();
+  else if(data.type===Hls.ErrorTypes.MEDIA_ERROR)hls.recoverMediaError();
+  else setTimeout(connect,2500);
+ });
 }
-video.addEventListener('playing',()=>{status.style.display='none';stuckChecks=0;});
-video.addEventListener('waiting',()=>{status.textContent='Buffering live stream…';status.style.display='block';});
-video.addEventListener('stalled',()=>{status.textContent='Stream stalled — reconnecting…';status.style.display='block';});
+video.addEventListener('playing',()=>{status.style.display='none';stuckChecks=0});
+video.addEventListener('waiting',()=>{status.textContent='Buffering…';status.style.display='block'});
+video.addEventListener('stalled',()=>{status.textContent='Stream stalled — reconnecting…';status.style.display='block'});
 setInterval(()=>{
-  if(video.paused||video.readyState<2)return;
-  if(video.currentTime===lastTime)stuckChecks++;else stuckChecks=0;
-  lastTime=video.currentTime;
-  if(stuckChecks>=4&&!reconnecting){
-    reconnecting=true;status.textContent='Reconnecting to live stream…';status.style.display='block';
-    try{hls.startLoad(-1);hls.recoverMediaError();}catch(e){}
-    video.play().catch(()=>{});stuckChecks=0;
-    setTimeout(()=>reconnecting=false,10000);
-  }
+ if(video.paused||video.readyState<2)return;
+ if(video.currentTime===lastTime)stuckChecks++;else stuckChecks=0;
+ lastTime=video.currentTime;
+ if(stuckChecks>=4&&!reconnecting){
+  reconnecting=true;status.textContent='Reconnecting…';status.style.display='block';
+  try{hls.startLoad(-1);hls.recoverMediaError()}catch(e){}
+  video.play().catch(()=>{});stuckChecks=0;setTimeout(()=>reconnecting=false,10000);
+ }
 },5000);
 connect();
 </script>

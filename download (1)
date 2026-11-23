@@ -1,0 +1,7 @@
+UPSTREAM_MASTER=https://example.com/live/stream/index.m3u8
+SECRET=adea31f2590dafc9d3798cf4ad72b87724207503dba327a24de12622e842d0ff
+ALLOWED_ORIGINS=https://crickontime1.vercel.app
+SESSION_HOURS=2
+BIND_IP=true
+REQUIRE_HEADER=true
+UPSTREAM_UA=Mozilla/5.0 (HLS relay)

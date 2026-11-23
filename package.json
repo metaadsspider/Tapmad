@@ -1,0 +1,12 @@
+{
+  "name": "secure-live-player",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HLS live player with a signed proxy relay that hides the real m3u8 URL",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
